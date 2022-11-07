@@ -1,0 +1,159 @@
+SELECT *
+FROM airport
+LIMIT 1
+
+SELECT *
+FROM airline
+LIMIT 1
+
+SELECT origin, depdelay
+FROM flight
+WHERE depdelay is not null
+ORDER BY depdelay DESC 
+LIMIT 1 
+
+SELECT iata, airport, airport.state, airport.country
+FROM airport, (
+               SELECT origin, depdelay
+               FROM flight
+               WHERE depdelay IS NOT Null
+               ORDER BY depdelay DESC
+               LIMIT 1
+               ) AS subq
+WHERE subq.origin=airport.iata
+
+SELECT airport, iata, subq.depdelay
+FROM airport, (
+               SELECT origin, depdelay
+               FROM flight
+               WHERE depdelay IS NOT Null
+               ORDER BY depdelay DESC
+               LIMIT 1
+               ) AS subq
+WHERE subq.origin=airport.iata
+ 
+SELECT iata, airport, airport.state, airport.country, subq.origin, subq.depdelay
+FROM airport, (
+               SELECT origin, depdelay
+               FROM flight
+               WHERE depdelay IS NOT Null
+               ORDER BY depdelay DESC
+               LIMIT 1
+               ) AS subq
+WHERE subq.origin=airport.iata
+ 
+SELECT airlinecode
+FROM airline
+where airlinecode='NW'
+SELECT MAX(depdelay)
+FROM flight
+
+SELECT airport.iata, airport.airport, airport.state, airport.country, flight.origin, flight.depdelay
+FROM airport
+INNER JOIN flight ON flight.origin= airport.iata
+AND depdelay is not null
+ORDER BY flight.depdelay DESC
+LIMIT 1
+
+SELECT DISTINCT city
+FROM airport
+WHERE airport.state='NY'
+
+SELECT COUNT(airport) as RetrasoDeSalidaDeMasDe120Min
+FROM airport, (
+               SELECT origin, depdelay
+               FROM flight
+               WHERE depdelay IS NOT Null AND depdelay>120
+               ) AS subq
+WHERE subq.origin=airport.iata AND airport.state='NY'
+
+SELECT COUNT(airport) as RetrasoDeSalidaDeMasDe120Min
+FROM airport
+INNER JOIN flight ON flight.origin= airport.iata
+AND depdelay is not null AND airport.state='NY' AND depdelay >120
+
+SELECT flight.distance
+FROM flight
+ORDER BY flight.distance DESC
+LIMIT 1
+
+SELECT flight.distance
+FROM flight
+ORDER BY flight.distance ASC
+LIMIT 1
+
+SELECT COUNT(airport.airport)
+FROM airport
+
+SELECT airport.
+
+SELECT airport.iata, airport.airport, airport.state
+FROM airport
+
+SELECT flight.month, COUNT(flight.month) 
+FROM flight
+GROUP BY flight.month 
+ORDER BY COUNT(flight.month) DESC
+LIMIT 2 
+
+SELECT CAST(flight.dayofweek AS varchar) AS dia, CAST(AVG(flight.arrdelay) AS FLOAT) AS retraso_promedio
+FROM flight
+GROUP BY flight.dayofweek
+ORDER BY AVG(flight.arrdelay) DESC
+
+SELECT CAST(weekday.weekday_name AS VARCHAR) AS dia_nombre, CAST(AVG(flight.arrdelay) AS DOUBLE PRECISION) AS retraso_promedio
+FROM flight
+INNER JOIN weekday ON weekday.dayofweek=flight.dayofweek
+GROUP BY flight.dayofweek, weekday.weekday_name
+ORDER BY AVG(flight.arrdelay) DESC
+
+SELECT flight.origin, flight.dest, COUNT(flight.origin) AS CantidadDeVuelosCuyoOrigenYDestinoEsIgual
+FROM flight
+GROUP BY flight.origin, flight.dest
+ORDER BY COUNT(flight.flightnum) DESC
+LIMIT 1
+
+SELECT subq1.state, COUNT(flight) AS CantidadDeVuelosInternos
+FROM flight, (
+                SELECT airport.iata, airport.state
+                FROM airport
+            )as subq1,
+            (   SELECT airport.iata, airport.state
+                FROM airport
+            )as subq2
+WHERE flight.origin=subq1.iata AND flight.dest=subq2.iata AND subq1.state=subq2.state
+GROUP BY subq1.state
+ORDER BY COUNT(subq1.state) DESC
+LIMIT 1
+
+SELECT airport.iata, airport.airport, airport.state  
+FROM airport, flight
+WHERE airport.iata NOT IN (flight.origin)
+
+
+SELECT DISTINCT airport.iata
+FROM airport
+SELECT DISTINCT flight.origin
+FROM flight
+
+SELECT flight.reporting_airline
+FROM flight
+LIMIT 10
+
+SELECT CAST(airline.airlinename AS VARCHAR) AS airline_name, CAST(AVG(flight.depdelay) AS FLOAT) AS average_delay
+FROM flight, airline
+WHERE  airline.airlinecode = flight.reporting_airline 
+GROUP BY airline.airlinename
+HAVING AVG(flight.depdelay)>=10
+ORDER BY AVG(flight.depdelay) DESC
+LIMIT 10
+
+SELECT CAST(airline.airlinename AS VARCHAR) AS airline_name, CAST(AVG(flight.arrdelay) AS FLOAT) AS average_delay
+FROM flight, airline
+WHERE  airline.airlinecode = flight.reporting_airline 
+GROUP BY airline.airlinename
+HAVING AVG(flight.arrdelay)>=10
+ORDER BY AVG(flight.arrdelay) DESC
+LIMIT 10
+
+TAANTURURURURURURURURURURURURURURURURURUUUUUUUUUUUUUUTUNTUNNNNN nuestro sobreviviente número 1 es tan resistente, que se le puede hallar practicamente en cualquier lugar del planeta. Desdee el fondo del oceano a la cima del himalaya. Puede sobrevivir en manantiales cálidos, y en los helados páramos artícos, en desiertos áridos

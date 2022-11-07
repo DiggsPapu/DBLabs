@@ -1,0 +1,27 @@
+
+La arquitectura del procesador es RISC reduced instruction set computing:
+Es thumb 32 que crea instrucciones de 16 bits de largo y 32 bits de largo, es una mezcla de ambos.
+Las instrucciones son más sencillas a operar
+Más operaciones par aproblemas complejos
+Se tienen registros especiales x,y,z de dirección indirecta.
+Se tiene flexibilidad en acceso a registros a pesar de no ser SRAM debido a que 
+es mapeado a alguna de las 32 localizaciones de memoria.
+Único ciclo de instrucciones.
+Permite un estado de 6 super escalares, predicción de ramas.
+Tiene un hardware dividido.
+Tiene multiplicidad de ciclos simples.
+Es SIMD de manera que maneja una instrucción para múltiples datos.
+
+Diagrama de bloques:
+En el primer bloque está el controlador del sistema, así que primero están los xin y xout para registrar la oscilación en el sistema, que es controlado por el PMC (power managment controller), que a su vez controla la fuente de poder en el VDDIO, así mismo, aquí se mantiene el real time Clock (RTC) para mantener la hora sincrónica, El reset controller que sirve para todos los resets del sistema sin ocmponentes externos. Y el periferal Bridge se encarga de manejar los datos y los procesos que se llevan a cabo. Los demás son interfaces para diferentes instrucciones. Así mismo se puede notar el multipuerto SRAM de 256 KB que tiene el AVR SAMV71, Se debe de destacar que el procesador CORTEX-M7 trabaja con 16 kb por instrucción de caché, 256 es el número máximo de sets y es embebida el ECC (error corrector memory) en el caché, también tiene una configuración para bloquear el doble núcleo de manera que se trabaje ccomo solo uno. Como se puede ver que está la matriz de bus que conecta el procesador y el debugger a los buses externos. Así mismo, usa TCM o (Tightly Coupled Memory) para una latencia baja en accesos de memoria que el núcleo puede usar. Así mismo se puede ver la External Bus interface que se encarga de asegurar el paso seguro de información entre dispositivos externos.
+ADC resolucion es el menor incremento de voltaje que puede ser reconocido y que cause un cambio en el output digital.
+SPI usado para la transferencia de información entre circuitos integrados
+QSPI comunicación con una memoria flash externa utilizando SPI
+USART Comunicación en serie sincrona mediante un periferico
+RSTC Reset controller
+VDDIO Power supply
+RTC Real Time clock
+
+Especificaciones de la familia:
+
+Paramétricas AVR SAMV71
