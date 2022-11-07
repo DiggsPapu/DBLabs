@@ -1,0 +1,164 @@
+-- Create an index over the index flight origin and flight dest
+create index on flight(origin)
+create index on flight(dest)
+-- Get the indexes in each table
+SELECT indexname, indexdef
+FROM pg_indexes 
+WHERE tablename = 'flight' or tablename = 'airline' or tablename = 'airport' or  tablename = 'weekday';
+
+SELECT indexname, indexdef
+FROM pg_indexes 
+WHERE tablename = 'airline';
+
+SELECT indexname, indexdef
+FROM pg_indexes 
+WHERE tablename = 'airport';
+
+SELECT indexname, indexdef
+FROM pg_indexes 
+WHERE tablename = 'weekday';
+-- Aerolíneas que salen del aeropuerto JFK
+select * from airline
+select unique airlinename from airline
+select * from flight Limit 10
+select distinct
+airline.airlinecode as Aircodes_That_Have_Flew_From_JFK from airline
+inner join (
+    select * from flight where origin = 'JFK'
+)as fl
+on fl.reporting_airline = airline.airlinecode
+-- Explicacion indice
+explain select distinct
+airline.airlinecode as Aircodes_That_Have_Flew_From_JFK from airline
+inner join (
+    select * from flight where origin = 'JFK'
+)as fl
+on fl.reporting_airline = airline.airlinecode
+-- Eliminar indice y volver a ejecutar query
+drop index flight_origin_idx 
+select distinct
+airline.airlinecode as Aircodes_That_Have_Flew_From_JFK from airline
+inner join (
+    select * from flight where origin = 'JFK'
+)as fl
+on fl.reporting_airline = airline.airlinecode
+-- Volver a crear el indice
+create index on flight(origin)
+-- Ejecutar la query y tomar su tiempo de ejecucion
+SELECT a.airlinecode, AVG(f.arrdelay) AS arr_delay_average
+FROM flight f
+ LEFT JOIN airline a ON f.reporting_airline = a.airlinecode
+WHERE a.airlinecode IN (
+ SELECT DISTINCT f.reporting_airline
+ FROM flight f
+ WHERE f.dest = 'JFK'
+)
+GROUP BY a.airlinecode
+ORDER BY arr_delay_average DESC;
+-- Ejecute un explain sobre la query 
+EXPLAIN SELECT a.airlinecode, AVG(f.arrdelay) AS arr_delay_average
+FROM flight f
+ LEFT JOIN airline a ON f.reporting_airline = a.airlinecode
+WHERE a.airlinecode IN (
+ SELECT DISTINCT f.reporting_airline
+ FROM flight f
+ WHERE f.dest = 'JFK'
+)
+GROUP BY a.airlinecode
+ORDER BY arr_delay_average DESC;
+-- Mejora de la query
+create index on airline(airlinecode)
+create index on flight(reporting_airline)
+create index on flight(reporting_airline, dest) 
+create index on flight(reporting_airline, airlinecode)
+drop index flight_arrdelay_idx
+create index on flight(arrdelay)
+-- Mejorar queries para no usar indices de funciones
+Create table ASIGNACION(carnet VARCHAR(12), codigo_curso VARCHAR(6), fecha_asignacion DATE)
+create table ASIGNACION_HISTORICA(carnet VARCHAR(12), codigo_curso VARCHAR(6), fecha_asignacion
+DATE, fecha_eliminacion DATE)
+drop table asignacion
+-- Trigger mas de 5 asignaciones
+create function asignation_validation()
+returns trigger as $$ declare asignation_total_course int;
+begin
+select count(carnet) into asignation_total_course
+from asignacion where codigo_curso = new.codigo_curso;
+if (asignation_total_course>4) then raise exception 
+'Las asignaciones del curso ya tienen su cupo maximo, no se puede asignar'
+using errcode = '20808';
+end if;
+return new;
+end; $$ language PLPGSQL 
+
+create trigger trigger_validation_asignation
+before insert on asignacion
+for each row execute procedure asignation_validation()
+
+drop function asignation_validation 
+drop trigger trigger_validation_asignation on asignacion
+
+DRop table asignacion
+drop table asignacion_historica
+
+insert into asignacion(carnet, codigo_curso, fecha_asignacion)
+values(489320483012, 328291, '01-01-2022'),
+(48932043012, 328291, '01-11-2022'),
+(789320483012, 328291, '10-01-2022'),
+(843920439023, 328291, '03-01-1992'),
+(972837429, 328291, '03-12-2021')
+insert into asignacion(carnet, codigo_curso, fecha_asignacion)
+values(8439248932, 328291, '05-07-2008')
+
+select count(carnet), codigo_curso from asignacion group by codigo_curso
+
+CREATE FUNCTION VALIDACION_ASIGNACION()
+RETURNS TRIGGER AS $$
+DECLARE
+	total_asignaciones INT; -- Esta variable almacenara el total de asignaciones actuales
+BEGIN
+	--Comienzo de las instrucciones
+	SELECT 		COUNT(carnet) INTO total_asignaciones
+	FROM		Asignacion
+	WHERE		codigo_curso = NEW.codigo_curso;
+	
+	--Estructura de control IF
+	IF (total_asignaciones >=5) THEN
+		RAISE EXCEPTION
+			'El curso ya tiene el cupo completo'
+		USING ERRCODE = '20808';
+	END IF;
+	
+	RETURN NEW;--Hasta este momento se realizara el insert
+END;
+$$ LANGUAGE PLPGSQL;
+
+drop trigger trigger_control_validacion on Asignacion
+CREATE TRIGGER TRIGGER_CONTROL_VALIDACION
+BEFORE INSERT
+ON Asignacion
+FOR EACH ROW
+	EXECUTE PROCEDURE VALIDACION_ASIGNACION();
+-- Trigger que ingrese en la tabla historica los eliminados de la tabla de asignacion
+create function insert_historic()
+returns trigger as $$
+begin
+insert into asignacion_historica(carnet, codigo_curso, fecha_asignacion, fecha_eliminacion)
+values(old.carnet, old.codigo_curso, old.fecha_asignacion, old.fecha_asignacion);
+return old;
+end; $$ language PLPGSQL 
+
+drop function insert_historic()
+drop trigger trigger_new_historic on asignacion
+
+create trigger trigger_new_historic
+before delete
+ON asignacion
+FOR EACH ROW
+	EXECUTE PROCEDURE insert_historic();
+    
+delete from asignacion where fecha_asignacion = '05-07-2008'
+drop table asignacion
+drop table asignacion_historica
+select * from asignacion
+select* from asignacion_historica
