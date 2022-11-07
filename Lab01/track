@@ -1,0 +1,48 @@
+SELECT *
+FROM pg_catalog.pg_tables
+WHERE schemaname != 'pg_catalog' AND 
+    schemaname != 'information_schema';
+
+SELECT * 
+FROM artist
+
+SELECT *
+FROM TRACK
+
+SELECT count(trackid)
+from TRACK
+
+SELECT artistid
+from artist
+where name = 'metallica'
+
+SELECT count(albumid)
+from album
+where artistid=50
+
+SELECT *
+FROM album
+
+SELECT COUNT(*) as MetallicaCount FROM (
+    SELECT o.artistid, i.artistid, i.name as L
+    FROM album o
+    INNER JOIN  artist i
+    ON o.artistid = i.artistid
+    WHERE i.name='metallica'
+)
+
+SELECT o.artistid, i.artistid, i.name
+FROM album o
+INNER JOIN  artist i
+ON o.artistid = i.artistid
+WHERE i.name='metallica'
+
+Select count(milliseconds)
+from TRACK
+WHERE milliseconds>=300000
+
+select avg(milliseconds)
+from track
+
+select sum(milliseconds)/count(milliseconds) as average
+from track
