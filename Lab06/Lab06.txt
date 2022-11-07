@@ -1,0 +1,166 @@
+
+drop table departamento cascade
+drop table municipio cascade
+drop table registrador cascade
+drop table ciudadano cascade
+drop table RegistroCivil cascade
+drop table Registrodefuncion cascade
+select * from departamento
+select * from municipio
+select * from registrador
+select * from ciudadano
+select * from registrocivil
+select * from registrodefuncion
+-- Todos los casados
+select cui 
+from registrocivil
+union all 
+select cuipareja
+from registrocivil
+
+select a.cui
+from registrodefuncion
+full join (
+    select cui 
+    from registrocivil
+    union all 
+    select cuipareja
+    from registrocivil) as a
+    on registrodefuncion.cui=a.cui
+    where registrodefuncion.cui is null
+
+
+drop table departamento cascade
+drop table municipio cascade
+drop table registrador cascade
+drop table ciudadano cascade
+drop table RegistroCivil cascade
+select * from departamento
+select * from municipio
+select * from registrador
+select * from ciudadano
+select * from registrocivil
+select * from registrodefuncion
+-- Todos los casados
+select cui 
+from registrocivil
+union all 
+select cuipareja
+from registrocivil
+
+select k.codigodepa from municipio as k
+inner join (
+select c.municipioid from ciudadano as c
+inner join(
+select a.cui
+from registrodefuncion
+full join (
+    select cui 
+    from registrocivil
+    union all 
+    select cuipareja
+    from registrocivil) as a
+    on registrodefuncion.cui=a.cui
+    where registrodefuncion.cui is null
+) as j
+on j.cui=c.cui
+)as n
+on k.codigomunicipio = n.municipioid
+
+select l.nombredepa, count(l.codigodepa) as cantidad_de_personas_casadas
+from departamento as l
+inner join(
+select k.codigodepa from municipio as k
+inner join (
+select c.municipioid from ciudadano as c
+inner join(
+select a.cui
+from registrodefuncion
+full join (
+    select cui 
+    from registrocivil
+    union all 
+    select cuipareja
+    from registrocivil) as a
+    on registrodefuncion.cui=a.cui
+    where registrodefuncion.cui is null
+) as j
+on j.cui=c.cui
+)as n
+on k.codigomunicipio = n.municipioid
+)as m
+on m.codigodepa = l.codigodepa
+group by l.codigodepa, l.nombredepa
+order by count(l.codigodepa) desc
+
+select l.nombredepa, count(l.codigodepa) as cantidad_de_personas_casadas
+from departamento as l
+inner join(
+select k.codigodepa from municipio as k
+inner join (
+select c.municipioid from ciudadano as c
+inner join(
+select a.cui
+from registrodefuncion
+full join (
+    select cui 
+    from registrocivil
+    union all 
+    select cuipareja
+    from registrocivil) as a
+    on registrodefuncion.cui=a.cui
+    where registrodefuncion.cui is null
+) as j
+on j.cui=c.cui
+)as n
+on k.codigomunicipio = n.municipioid
+)as m
+on m.codigodepa = l.codigodepa
+where l.nombredepa = 'Guatemala'
+group by l.codigodepa, l.nombredepa
+
+select registrador.numerodecolegiado, count(k.numerodecolegiado) from registrador
+full join (
+    select * from ciudadano 
+    where ciudadano.fechadenacimiento<'2022-03-01' and ciudadano.fechadenacimiento>='2022-02-01'
+)as k
+on k.numerodecolegiado=registrador.numerodecolegiado
+group by registrador.numerodecolegiado
+order by count(k.numerodecolegiado) desc
+
+select * from ciudadano
+inner join (
+    select * from municipio
+) as m
+on ciudadano.municipioid=m.codigomunicipio
+where ciudadano.fechadenacimiento>'2021-12-31' and ciudadano.fechadenacimiento<='2022-12-31'
+
+select d.nombredepa as Nombre_Departamento, count(d.codigodepa) as Cantidad_De_Nacimientos from departamento as d
+inner join(
+select * from municipio as m
+inner join (
+    select * from ciudadano
+) as c
+on c.municipioid=m.codigomunicipio
+where c.fechadenacimiento>'2021-12-31' and c.fechadenacimiento<='2022-12-31'
+) as k
+on k.codigodepa = d.codigodepa
+group by d.codigodepa, d.nombredepa
+order by count(d.codigodepa) desc
+
+select nombre, apellido from ciudadano
+where cuimama = 57943563 or cuipapa=57943563 or cuitutorlegal = 57943563
+13493616
+select nombre, apellido, cui from ciudadano
+where cuimama = 99314512 or cuipapa=99314512
+48499901
+
+select * from ciudadano
+where cui = 48499901
+
+select ciudadano.cui, ciudadano.nombre, ciudadano.apellido from ciudadano
+inner join (select * from ciudadano
+           where cui = 48499901) as k
+on k.cuipapa=ciudadano.cuipapa or k.cuimama=ciudadano.cuimama
+where ciudadano.cui!=k.cui
+
